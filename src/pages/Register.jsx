@@ -73,7 +73,7 @@ function Register() {
         <div style={cardStyle}>
           {/* Logo */}
           <div className="text-center mb-4">
-            <img src={logo} alt="VisitBD Logo" style={{ height: '70px', width: 'auto', objectFit: 'contain', margin: '0 auto 12px', display: 'block' }} />
+            <img src={logo} alt="VisitBD Logo" style={{ height: '70px', width: 'auto', objectFit: 'contain', margin: '0 auto 12px', display: 'block', mixBlendMode: 'lighten' }} />
             <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>Create Account</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Join VisitBD — free forever</p>
           </div>

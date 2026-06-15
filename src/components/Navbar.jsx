@@ -57,7 +57,7 @@ function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="d-flex align-items-center gap-2" style={{ textDecoration: 'none' }}>
-            <img src={logo} alt="VisitBD Logo" style={{ height: '55px', width: 'auto', objectFit: 'contain' }} />
+            <img src={logo} alt="VisitBD Logo" style={{ height: '55px', width: 'auto', objectFit: 'contain', mixBlendMode: 'lighten' }} />
           </Link>
 
           {/* Desktop Nav Links */}
