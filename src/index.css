@@ -1,0 +1,180 @@
+/* ============================================
+   GLOBAL RESETS & BASE STYLES
+   ============================================ */
+@import './styles/theme.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--dark);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dark-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* ============================================
+   BOOTSTRAP OVERRIDES
+   ============================================ */
+.container, .container-fluid {
+  max-width: 1280px;
+}
+
+.btn:focus, .btn:active:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.form-control {
+  background: var(--dark-3);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+}
+.form-control:focus {
+  background: var(--dark-3);
+  border-color: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px rgba(0,106,78,0.2);
+}
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+.form-select {
+  background-color: var(--dark-3);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+}
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,106,78,0.2);
+}
+.form-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+/* ============================================
+   SECTION BASE STYLES
+   ============================================ */
+.section {
+  padding: var(--section-padding);
+  position: relative;
+}
+.section-sm {
+  padding: var(--section-padding-sm);
+}
+.section-dark { background: var(--dark); }
+.section-dark-2 { background: var(--dark-2); }
+.section-dark-3 { background: var(--dark-3); }
+
+/* ============================================
+   PAGE WRAPPER (below fixed navbar)
+   ============================================ */
+.page-wrapper {
+  min-height: 100vh;
+  padding-top: 70px;
+}
+
+/* ============================================
+   LOADING / PAGE TRANSITIONS
+   ============================================ */
+.page-enter {
+  animation: pageEnter 0.4s ease forwards;
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   MISC UTILITIES
+   ============================================ */
+.cursor-pointer { cursor: pointer; }
+.no-select { user-select: none; }
+.overflow-hidden { overflow: hidden; }
+
+.text-gradient {
+  background: linear-gradient(135deg, #00875f, #E8B84B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bootstrap card dark override */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+}
+
+/* Dropdown dark override */
+.dropdown-menu {
+  background: var(--dark-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.dropdown-item {
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.dropdown-item:hover {
+  background: rgba(0,106,78,0.15);
+  color: var(--primary-light);
+}

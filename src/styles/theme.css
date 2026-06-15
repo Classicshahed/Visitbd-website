@@ -1,0 +1,356 @@
+/* ============================================
+   BANGLADESH TOURISM — THEME CSS
+   Custom Color Tokens & Design System
+   ============================================ */
+
+:root {
+  /* Bangladesh-Inspired Color Palette */
+  --primary: #006A4E;         /* Bangladesh forest green */
+  --primary-light: #00875f;   /* Lighter green */
+  --primary-dark: #004d38;    /* Darker green */
+  --accent: #F42A41;          /* Flag red — CTAs, badges */
+  --accent-light: #ff5568;    /* Lighter red */
+  --gold: #E8B84B;            /* Premium gold highlights */
+  --gold-light: #f5d07a;      /* Light gold */
+
+  /* Dark Luxury Backgrounds */
+  --dark: #0D1B2A;            /* Deepest background */
+  --dark-2: #122333;          /* Section backgrounds */
+  --dark-3: #1A2E42;          /* Elevated surfaces */
+  --card-bg: #1A2940;         /* Card backgrounds */
+  --card-hover: #1f3351;      /* Card hover state */
+  --border-color: rgba(255,255,255,0.08);
+
+  /* Text Colors */
+  --text-primary: #F0F4F8;    /* Primary text */
+  --text-secondary: #9BB0C5;  /* Secondary/muted text */
+  --text-muted: #6B8299;      /* Very muted text */
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #006A4E 0%, #004d38 100%);
+  --gradient-accent: linear-gradient(135deg, #F42A41 0%, #c41f32 100%);
+  --gradient-gold: linear-gradient(135deg, #E8B84B 0%, #c99a2e 100%);
+  --gradient-hero: linear-gradient(180deg, rgba(13,27,42,0.3) 0%, rgba(13,27,42,0.85) 100%);
+  --gradient-card: linear-gradient(180deg, transparent 40%, rgba(13,27,42,0.95) 100%);
+  --gradient-dark: linear-gradient(135deg, #0D1B2A 0%, #122333 50%, #1A2940 100%);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(26, 41, 64, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --blur: blur(12px);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow-green: 0 0 30px rgba(0, 106, 78, 0.3);
+  --shadow-glow-gold: 0 0 30px rgba(232, 184, 75, 0.3);
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Typography — Cultural Balance:
+     Hind Siliguri: Bengali-script inspired, used for prominent cultural headings
+     Poppins: Modern web performance headings
+     Inter: Body text readability */
+  --font-heading: 'Poppins', 'Hind Siliguri', sans-serif;
+  --font-cultural: 'Hind Siliguri', 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing */
+  --section-padding: 90px 0;
+  --section-padding-sm: 60px 0;
+}
+
+/* ============================================
+   UTILITY CLASSES (Bangladesh Themed)
+   ============================================ */
+
+.text-primary-bd { color: var(--primary) !important; }
+.text-accent-bd  { color: var(--accent) !important; }
+.text-gold-bd    { color: var(--gold) !important; }
+
+.bg-primary-bd { background: var(--gradient-primary) !important; }
+.bg-dark-bd    { background: var(--dark) !important; }
+.bg-card-bd    { background: var(--card-bg) !important; }
+
+.badge-primary { background: var(--gradient-primary); color: #fff; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; }
+.badge-accent  { background: var(--gradient-accent); color: #fff; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 600; }
+.badge-gold    { background: var(--gradient-gold); color: #0D1B2A; padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; }
+
+.btn-primary-bd {
+  background: var(--gradient-primary);
+  border: none;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary-bd:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-green), var(--shadow-lg);
+  background: linear-gradient(135deg, #00875f 0%, #006A4E 100%);
+  color: #fff;
+}
+
+.btn-accent-bd {
+  background: var(--gradient-accent);
+  border: none;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  transition: var(--transition);
+}
+.btn-accent-bd:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(244, 42, 65, 0.4), var(--shadow-lg);
+  color: #fff;
+}
+
+.btn-outline-bd {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 10px 26px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: var(--transition);
+}
+.btn-outline-bd:hover {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 106, 78, 0.15);
+  border: 1px solid rgba(0, 106, 78, 0.3);
+  color: var(--primary-light);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* Star Rating */
+.star-rating { color: var(--gold); font-size: 0.9rem; }
+
+/* Animated Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Divider */
+.divider-gold {
+  width: 60px;
+  height: 3px;
+  background: var(--gradient-gold);
+  border-radius: 2px;
+  margin: 16px 0;
+}
+
+.divider-primary {
+  width: 60px;
+  height: 3px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  margin: 16px auto;
+}
+
+/* Scroll animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up-1 { animation-delay: 0.1s; }
+.fade-in-up-2 { animation-delay: 0.2s; }
+.fade-in-up-3 { animation-delay: 0.3s; }
+.fade-in-up-4 { animation-delay: 0.4s; }
+
+/* Price tag */
+.price-tag {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+
+.category-pill {
+  background: rgba(0,106,78,0.2);
+  border: 1px solid rgba(0,106,78,0.35);
+  color: #4db88c;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   BOOTSTRAP BANGLADESH COLOR THEME OVERRIDES
+   ============================================ */
+
+/* Override Bootstrap primary to Bangladesh green */
+:root {
+  --bs-primary: #006A4E;
+  --bs-primary-rgb: 0, 106, 78;
+  --bs-danger: #F42A41;
+  --bs-danger-rgb: 244, 42, 65;
+  --bs-warning: #E8B84B;
+  --bs-warning-rgb: 232, 184, 75;
+  --bs-success: #00875f;
+  --bs-success-rgb: 0, 135, 95;
+  --bs-dark: #0D1B2A;
+  --bs-dark-rgb: 13, 27, 42;
+  --bs-body-bg: #0D1B2A;
+  --bs-body-color: #F0F4F8;
+  --bs-border-color: rgba(255,255,255,0.1);
+  --bs-form-control-bg: #1A2940;
+  --bs-secondary-bg: #122333;
+}
+
+/* Bootstrap form control dark theme */
+.form-control, .form-select {
+  background-color: var(--dark-3) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+.form-control:focus, .form-select:focus {
+  background-color: var(--dark-3) !important;
+  border-color: var(--primary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0,106,78,0.2) !important;
+}
+.form-control::placeholder { color: var(--text-muted); }
+.form-label {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.form-select option { background: var(--dark-3); color: var(--text-primary); }
+.form-control.is-invalid { border-color: var(--accent) !important; }
+.form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(244,42,65,0.2) !important; }
+
+/* Bootstrap dropdown dark theme */
+.dropdown-menu {
+  background-color: var(--dark-3) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-radius: var(--radius-md) !important;
+}
+.dropdown-item {
+  color: var(--text-secondary) !important;
+  font-size: 0.88rem;
+  padding: 8px 16px;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: rgba(0,106,78,0.15) !important;
+  color: var(--primary-light) !important;
+}
+.dropdown-divider { border-color: var(--border-color) !important; }
+
+/* Bangladesh section layouts */
+.section { padding: 90px 0; }
+.section-sm { padding: 60px 0; }
+.section-dark { background: var(--dark); }
+.section-dark-2 { background: var(--dark-2); }
+.page-wrapper { padding-top: 70px; }
+
+/* ============================================
+   LEAFLET MAP CUSTOMIZATION
+   ============================================ */
+
+/* Custom Leaflet popup styling to match dark theme */
+.leaflet-popup-content-wrapper {
+  background: #1A2940;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  color: #F0F4F8;
+  padding: 0;
+}
+.leaflet-popup-content {
+  margin: 14px 20px;
+  line-height: 1.5;
+  font-size: 14px;
+  min-width: 200px;
+}
+.leaflet-popup-tip { background: #1A2940; }
+.leaflet-popup-close-button {
+  color: #6B8299 !important;
+  font-size: 16px !important;
+  top: 6px !important;
+  right: 8px !important;
+}
+.leaflet-popup-close-button:hover { color: #F0F4F8 !important; }
+
+/* Dark scrollbars */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark-2); }
+::-webkit-scrollbar-thumb { background: rgba(0,106,78,0.5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
