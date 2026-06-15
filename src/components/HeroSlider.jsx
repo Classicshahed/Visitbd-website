@@ -5,12 +5,23 @@ import { FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaMapMarkerAlt } from '
 
 const SLIDES = [
   {
+    id: 3,
+    title: "Home of the",
+    titleHighlight: "Spotted Deer",
+    subtitle: "The Sundarbans",
+    description: "The world's largest mangrove forest — a UNESCO World Heritage site teeming with wildlife, including the graceful spotted deer.",
+    image: "/sundarbans_hero.png",
+    location: "Khulna Division",
+    cta: "/destinations/2",
+    badge: "🌿 UNESCO Heritage",
+  },
+  {
     id: 1,
     title: "World's Longest",
     titleHighlight: "Sea Beach",
     subtitle: "Cox's Bazar",
-    description: "120 kilometers of unbroken golden sand along the Bay of Bengal — a natural wonder that takes your breath away.",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=85",
+    description: "Relax under a beach umbrella on 120 kilometers of unbroken golden sand. Experience the beauty of the world's longest natural sea beach.",
+    image: "/coxs_bazar_hero.png",
     location: "Chittagong Division",
     cta: "/destinations/1",
     badge: "🏖️ Most Popular",
@@ -21,21 +32,10 @@ const SLIDES = [
     titleHighlight: "the Hills",
     subtitle: "Sajek Valley",
     description: "Clouds drift below your feet at 1800 feet above sea level. Wake up to a sea of clouds at sunrise over the Chittagong Hill Tracts.",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=85",
+    image: "/sajek.jpg",
     location: "Rangamati District",
     cta: "/destinations/3",
     badge: "⛰️ Top Rated",
-  },
-  {
-    id: 3,
-    title: "Land of the",
-    titleHighlight: "Royal Bengal Tiger",
-    subtitle: "The Sundarbans",
-    description: "The world's largest mangrove forest — a UNESCO World Heritage site teeming with the majestic Royal Bengal Tiger.",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=85",
-    location: "Khulna Division",
-    cta: "/destinations/2",
-    badge: "🌿 UNESCO Heritage",
   },
 ];
 

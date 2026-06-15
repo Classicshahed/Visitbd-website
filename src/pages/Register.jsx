@@ -1,8 +1,9 @@
 // src/pages/Register.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGlobeAsia, FaCheckCircle } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheckCircle } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.png';
 
 function Register() {
   const { register, isAuthenticated } = useAuth();
@@ -72,8 +73,8 @@ function Register() {
         <div style={cardStyle}>
           {/* Logo */}
           <div className="text-center mb-4">
-            <div style={logoStyle}><FaGlobeAsia size={22} color="#fff" /></div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-primary)', marginTop: 12, marginBottom: 4 }}>Create Account</h2>
+            <img src={logo} alt="VisitBD Logo" style={{ height: '70px', width: 'auto', objectFit: 'contain', margin: '0 auto 12px', display: 'block' }} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>Create Account</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Join VisitBD — free forever</p>
           </div>
 

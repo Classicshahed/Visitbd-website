@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaGlobeAsia, FaFacebook, FaInstagram, FaYoutube, FaTwitter, FaMapMarkerAlt, FaPhone, FaEnvelope, FaHeart } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 
 function Footer() {
   const year = new Date().getFullYear();
@@ -17,15 +18,7 @@ function Footer() {
           {/* Brand Column */}
           <div className="col-lg-4 col-md-6">
             <div className="d-flex align-items-center gap-2 mb-3">
-              <div style={logoIconStyle}>
-                <FaGlobeAsia size={18} color="#fff" />
-              </div>
-              <div>
-                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-                  Visit<span style={{ color: 'var(--primary-light)' }}>BD</span>
-                </span>
-                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>Tourism</div>
-              </div>
+              <img src={logo} alt="VisitBD Logo" style={{ height: '55px', width: 'auto', objectFit: 'contain' }} />
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: 20 }}>
               Discover the incredible beauty of Bangladesh — from the world's longest beach to the majestic Royal Bengal Tiger habitat. Your adventure starts here.

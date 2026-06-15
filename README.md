@@ -352,7 +352,7 @@ npm run lint       # Run ESLint checks
 
 - **Frontend-only** — No real server. All "API calls" use localStorage + static JSON.
 - **Sessions reset on localStorage.clear()** — This wipes all admin edits, added destinations, wishlists, and login sessions.
-- **Images** — Sourced from Unsplash. Requires an internet connection to display correctly.
+- **Images** — Hero slider images and logos are stored locally. Destination gallery images are sourced from Unsplash and require an internet connection to display correctly.
 - **Map tiles** — Leaflet uses CartoDB tile servers. Requires internet connection.
 - **Auth is simulated** — Passwords are checked client-side (not secure for production).
 

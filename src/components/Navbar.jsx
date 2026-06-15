@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FaGlobeAsia, FaHeart, FaUser, FaSignOutAlt, FaBars, FaTimes, FaTachometerAlt, FaUserShield } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useBooking } from '../context/BookingContext';
+import logo from '../assets/logo.png';
 
 function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -56,15 +57,7 @@ function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="d-flex align-items-center gap-2" style={{ textDecoration: 'none' }}>
-            <div style={logoIconStyle}>
-              <FaGlobeAsia size={18} color="#fff" />
-            </div>
-            <div>
-              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
-                Visit<span style={{ color: 'var(--primary-light)' }}>BD</span>
-              </span>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '1.5px', textTransform: 'uppercase', lineHeight: 1, marginTop: -2 }}>Tourism</div>
-            </div>
+            <img src={logo} alt="VisitBD Logo" style={{ height: '55px', width: 'auto', objectFit: 'contain' }} />
           </Link>
 
           {/* Desktop Nav Links */}
