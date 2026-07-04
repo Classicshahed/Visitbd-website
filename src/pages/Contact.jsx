@@ -1,12 +1,19 @@
 // src/pages/Contact.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebook, FaInstagram, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
+import { fetchContactContent } from '../services/api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState(null);
+
+  useEffect(() => {
+    fetchContactContent().then(setContent);
+  }, []);
 
   const validate = () => {
     const e = {};
@@ -32,6 +39,21 @@ function Contact() {
     setSubmitted(true);
   };
 
+  if (!content) {
+    return (
+      <div className="page-wrapper" style={{ background: 'var(--dark)', minHeight: '100vh', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <LoadingSpinner text="Loading..." />
+      </div>
+    );
+  }
+
+  const contactInfo = [
+    { icon: <FaMapMarkerAlt size={18} />, title: 'Office', text: content.office },
+    { icon: <FaPhone size={18} />, title: 'Phone', text: content.phone },
+    { icon: <FaEnvelope size={18} />, title: 'Email', text: content.email },
+    { icon: <FaClock size={18} />, title: 'Hours', text: content.hours },
+  ];
+
   return (
     <div className="page-wrapper" style={{ background: 'var(--dark)', minHeight: '100vh' }}>
       {/* Header */}
@@ -39,7 +61,7 @@ function Contact() {
         <div className="container text-center" style={{ maxWidth: 640 }}>
           <div className="section-badge mx-auto">✉️ Get in Touch</div>
           <h1 className="section-title mt-2 mb-3">Contact Us</h1>
-          <p className="section-subtitle">Have a question, partnership idea, or just want to say hello? We'd love to hear from you!</p>
+          <p className="section-subtitle">{content.heroSubtitle}</p>
         </div>
       </div>
 
@@ -49,12 +71,7 @@ function Contact() {
           <div className="col-lg-4">
             <h4 style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', marginBottom: 24 }}>Contact Information</h4>
             <div className="d-flex flex-column gap-4 mb-5">
-              {[
-                { icon: <FaMapMarkerAlt size={18} />, title: 'Office', text: 'Level 5, Banani Tower\nDhaka-1213, Bangladesh' },
-                { icon: <FaPhone size={18} />, title: 'Phone', text: '+880 1700 000000\n+880 1800 000000' },
-                { icon: <FaEnvelope size={18} />, title: 'Email', text: 'info@visitbd.com\nsupport@visitbd.com' },
-                { icon: <FaClock size={18} />, title: 'Hours', text: 'Sun–Thu: 9am – 6pm\nFri: 9am – 1pm' },
-              ].map((item, i) => (
+              {contactInfo.map((item, i) => (
                 <div key={i} className="d-flex gap-3 align-items-start">
                   <div style={{ width: 44, height: 44, background: 'rgba(0,106,78,0.12)', border: '1px solid rgba(0,106,78,0.25)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-light)', flexShrink: 0, marginTop: 2 }}>
                     {item.icon}
@@ -133,7 +150,7 @@ function Contact() {
             <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-color)', height: 240, marginTop: 24 }}>
               <iframe
                 title="VisitBD Office Location"
-                src="https://maps.google.com/maps?q=Banani,Dhaka,Bangladesh&z=13&output=embed"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(content.mapQuery)}&z=13&output=embed`}
                 width="100%" height="100%" style={{ border: 0 }} loading="lazy"
               />
             </div>

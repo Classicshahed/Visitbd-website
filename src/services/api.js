@@ -120,3 +120,91 @@ export async function fetchStats() {
     deleted: getDeletedIds().length,
   };
 }
+
+// ── About Page Content ────────────────────────────────────────────
+const ABOUT_KEY = 'bd_tourism_about_content';
+
+export const DEFAULT_ABOUT = {
+  heroSubtitle: 'We are a team of passionate Bangladeshi travelers on a mission to showcase the breathtaking beauty of our homeland to the world — one destination at a time.',
+  missionText1: 'Bangladesh is one of the world\'s most underrated travel destinations. From the world\'s longest sea beach to a UNESCO-listed mangrove forest to cloud-capped hill stations, the country is overflowing with natural and cultural wonders.',
+  missionText2: 'We built VisitBD to change that narrative. Our goal is simple: make Bangladesh a must-visit destination on every traveler\'s list, starting with its own people.',
+  ctaTitle: 'Ready to Explore Bangladesh?',
+  ctaSubtitle: 'Join thousands of travelers who have already discovered the magic of Bangladesh through VisitBD.',
+  team: [
+    { name: 'Rafiqul Islam', role: 'Founder & CEO', img: 'https://i.pravatar.cc/120?img=11', bio: 'Passionate traveler who has explored all 64 districts of Bangladesh.' },
+    { name: 'Nusrat Jahan', role: 'Head of Content', img: 'https://i.pravatar.cc/120?img=47', bio: 'Travel writer and photographer with 8 years of experience.' },
+    { name: 'Tanvir Ahmed', role: 'Tech Lead', img: 'https://i.pravatar.cc/120?img=15', bio: 'Building seamless digital experiences for travelers.' },
+    { name: 'Maliha Rahman', role: 'Community Manager', img: 'https://i.pravatar.cc/120?img=44', bio: 'Connecting travelers and building our growing community.' },
+  ],
+};
+
+export async function fetchAboutContent() {
+  await delay(200);
+  try {
+    const saved = localStorage.getItem(ABOUT_KEY);
+    if (saved) return { ...DEFAULT_ABOUT, ...JSON.parse(saved) };
+  } catch {}
+  return { ...DEFAULT_ABOUT };
+}
+
+export async function saveAboutContent(data) {
+  await delay(400);
+  localStorage.setItem(ABOUT_KEY, JSON.stringify(data));
+  return { success: true };
+}
+
+// ── Contact Page Content ──────────────────────────────────────────
+const CONTACT_KEY = 'bd_tourism_contact_content';
+
+export const DEFAULT_CONTACT = {
+  heroSubtitle: 'Have a question, partnership idea, or just want to say hello? We\'d love to hear from you!',
+  office: 'Level 5, Banani Tower\nDhaka-1213, Bangladesh',
+  phone: '+880 1700 000000\n+880 1800 000000',
+  email: 'info@visitbd.com\nsupport@visitbd.com',
+  hours: 'Sun–Thu: 9am – 6pm\nFri: 9am – 1pm',
+  mapQuery: 'Banani,Dhaka,Bangladesh',
+};
+
+export async function fetchContactContent() {
+  await delay(200);
+  try {
+    const saved = localStorage.getItem(CONTACT_KEY);
+    if (saved) return { ...DEFAULT_CONTACT, ...JSON.parse(saved) };
+  } catch {}
+  return { ...DEFAULT_CONTACT };
+}
+
+export async function saveContactContent(data) {
+  await delay(400);
+  localStorage.setItem(CONTACT_KEY, JSON.stringify(data));
+  return { success: true };
+}
+
+// ── Home Page Images Content ──────────────────────────────────────
+const HOME_IMAGES_KEY = 'bd_tourism_home_images';
+
+export const DEFAULT_HOME_IMAGES = {
+  whyUsImages: [
+    'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
+    'https://images.unsplash.com/photo-1431794062232-2a99a5431c6c?w=600&q=80',
+  ],
+  aboutMissionImage: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=700&q=80',
+};
+
+export async function fetchHomeImages() {
+  await delay(200);
+  try {
+    const saved = localStorage.getItem(HOME_IMAGES_KEY);
+    if (saved) return { ...DEFAULT_HOME_IMAGES, ...JSON.parse(saved) };
+  } catch {}
+  return { ...DEFAULT_HOME_IMAGES };
+}
+
+export async function saveHomeImages(data) {
+  await delay(400);
+  localStorage.setItem(HOME_IMAGES_KEY, JSON.stringify(data));
+  return { success: true };
+}
+

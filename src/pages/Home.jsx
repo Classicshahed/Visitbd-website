@@ -5,6 +5,7 @@ import { FaStar, FaUsers, FaMapMarkedAlt, FaAward, FaShieldAlt, FaHeadset, FaArr
 import HeroSlider from '../components/HeroSlider';
 import DestinationCard from '../components/DestinationCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { fetchHomeImages } from '../services/api';
 
 const STATS = [
   { icon: <FaMapMarkedAlt size={24} />, value: '15+', label: 'Destinations' },
@@ -28,6 +29,12 @@ const TESTIMONIALS = [
 function Home() {
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [whyUsImages, setWhyUsImages] = useState([
+    'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
+    'https://images.unsplash.com/photo-1431794062232-2a99a5431c6c?w=600&q=80',
+  ]);
 
   useEffect(() => {
     fetch('/data/destinations.json')
@@ -37,6 +44,10 @@ function Home() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    fetchHomeImages().then(data => {
+      if (data.whyUsImages) setWhyUsImages(data.whyUsImages);
+    });
   }, []);
 
   return (
@@ -120,12 +131,7 @@ function Home() {
             </div>
             <div className="col-lg-7">
               <div className="row g-3">
-                {[
-                  'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=600&q=80',
-                  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-                  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
-                  'https://images.unsplash.com/photo-1431794062232-2a99a5431c6c?w=600&q=80',
-                ].map((src, i) => (
+                {whyUsImages.map((src, i) => (
                   <div key={i} className={`col-6 ${i === 0 ? 'mt-0' : i === 2 ? 'mt-0' : 'mt-3'}`}>
                     <img src={src} alt="Bangladesh travel" style={{ width: '100%', height: i % 2 === 0 ? 200 : 160, objectFit: 'cover', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }} loading="lazy" />
                   </div>

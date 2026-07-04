@@ -4,10 +4,10 @@ import { Navigate, Link } from 'react-router-dom';
 import {
   FaPlus, FaTrash, FaEdit, FaMapMarkerAlt, FaStar,
   FaChartBar, FaDatabase, FaCheckCircle, FaExclamationTriangle,
-  FaTimes, FaSave, FaEye, FaSearch, FaSync,
+  FaTimes, FaSave, FaEye, FaSearch, FaSync, FaUserPlus,
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import { fetchDestinations, addDestination, editDestination, deleteDestination, fetchStats } from '../services/api';
+import { fetchDestinations, addDestination, editDestination, deleteDestination, fetchStats, fetchAboutContent, saveAboutContent, fetchContactContent, saveContactContent, fetchHomeImages, saveHomeImages, DEFAULT_ABOUT, DEFAULT_CONTACT, DEFAULT_HOME_IMAGES } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const CATEGORIES = ['Beach','Hill','Forest','Heritage','Lake','Tea Garden','Adventure','Cultural'];
@@ -251,6 +251,12 @@ export default function AdminPanel() {
   const [search, setSearch]         = useState('');
   const [confirmId, setConfirmId]   = useState(null);
 
+  // About & Contact page content state
+  const [aboutForm, setAboutForm]     = useState(null);
+  const [contactForm, setContactForm] = useState(null);
+  const [homeImagesForm, setHomeImagesForm] = useState(null);
+  const [pageSaving, setPageSaving]   = useState(false);
+
   const showToast = (message, type='success') => setToast({ message, type });
 
   // Load stats
@@ -268,6 +274,9 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (activeTab === 'manage') loadDestinations();
+    if (activeTab === 'about' && !aboutForm) fetchAboutContent().then(setAboutForm);
+    if (activeTab === 'contact' && !contactForm) fetchContactContent().then(setContactForm);
+    if (activeTab === 'images' && !homeImagesForm) fetchHomeImages().then(setHomeImagesForm);
   }, [activeTab]);
 
   // ── Handlers ──────────────────────────────────────────────────
@@ -312,10 +321,70 @@ export default function AdminPanel() {
     d.category?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // ── About & Contact handlers ──────────────────────────────────
+  const handleAboutChange = (field, value) => setAboutForm(p => ({ ...p, [field]: value }));
+  const handleContactChange = (field, value) => setContactForm(p => ({ ...p, [field]: value }));
+
+  const handleAboutSave = async () => {
+    setPageSaving(true);
+    try {
+      await saveAboutContent(aboutForm);
+      showToast('✅ About page updated successfully!');
+    } catch { showToast('Failed to save About page', 'error'); }
+    setPageSaving(false);
+  };
+
+  const handleContactSave = async () => {
+    setPageSaving(true);
+    try {
+      await saveContactContent(contactForm);
+      showToast('✅ Contact page updated successfully!');
+    } catch { showToast('Failed to save Contact page', 'error'); }
+    setPageSaving(false);
+  };
+
+  const handleAboutReset = () => { setAboutForm({ ...DEFAULT_ABOUT }); showToast('About page reset to defaults', 'info'); };
+  const handleContactReset = () => { setContactForm({ ...DEFAULT_CONTACT }); showToast('Contact page reset to defaults', 'info'); };
+
+  // Home Images handlers
+  const handleHomeImageChange = (index, value) => {
+    setHomeImagesForm(p => {
+      const imgs = [...(p.whyUsImages || [])];
+      imgs[index] = value;
+      return { ...p, whyUsImages: imgs };
+    });
+  };
+  const handleAboutImageChange = (value) => setHomeImagesForm(p => ({ ...p, aboutMissionImage: value }));
+  const handleHomeImagesSave = async () => {
+    setPageSaving(true);
+    try { await saveHomeImages(homeImagesForm); showToast('\u2705 Images updated successfully!'); }
+    catch { showToast('Failed to save images', 'error'); }
+    setPageSaving(false);
+  };
+  const handleHomeImagesReset = () => { setHomeImagesForm({ ...DEFAULT_HOME_IMAGES }); showToast('Images reset to defaults', 'info'); };
+
+  // Team member helpers
+  const handleTeamChange = (index, field, value) => {
+    setAboutForm(p => {
+      const team = [...(p.team || [])];
+      team[index] = { ...team[index], [field]: value };
+      return { ...p, team };
+    });
+  };
+  const addTeamMember = () => {
+    setAboutForm(p => ({ ...p, team: [...(p.team || []), { name: '', role: '', img: 'https://i.pravatar.cc/120?img=1', bio: '' }] }));
+  };
+  const removeTeamMember = (index) => {
+    setAboutForm(p => ({ ...p, team: (p.team || []).filter((_, i) => i !== index) }));
+  };
+
   const TABS = [
-    { key:'stats',  icon:'📊', label:'Stats'     },
-    { key:'add',    icon:'➕', label:'Add New'   },
-    { key:'manage', icon:'📋', label:'Manage All' },
+    { key:'stats',   icon:'📊', label:'Stats'        },
+    { key:'add',     icon:'➕', label:'Add New'      },
+    { key:'manage',  icon:'📋', label:'Manage All'   },
+    { key:'about',   icon:'📄', label:'About Page'   },
+    { key:'contact', icon:'📞', label:'Contact Page' },
+    { key:'images',  icon:'🖼️', label:'Images'       },
   ];
 
   const CATEGORY_COLORS = {
@@ -532,6 +601,225 @@ export default function AdminPanel() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ABOUT PAGE TAB */}
+        {activeTab === 'about' && (
+          <div className="row justify-content-center">
+            <div className="col-lg-9">
+              <div style={{ background:'var(--card-bg)', border:'1px solid var(--border-color)', borderRadius:20, overflow:'hidden' }}>
+                <div style={{ background:'linear-gradient(135deg, #003d2e 0%, #006A4E 100%)', padding:'24px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+                  <div>
+                    <h4 style={{ fontFamily:'var(--font-heading)', fontWeight:800, color:'#fff', margin:0 }}>📄 Edit About Page</h4>
+                    <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.82rem', margin:'4px 0 0' }}>Changes appear instantly on the About page</p>
+                  </div>
+                  <div style={{ display:'flex', gap:8 }}>
+                    <button onClick={handleAboutReset} style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem' }}>Reset Defaults</button>
+                    <Link to="/about" target="_blank" style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem', textDecoration:'none', display:'inline-flex', alignItems:'center', gap:5 }}><FaEye size={11}/> Preview</Link>
+                  </div>
+                </div>
+
+                {!aboutForm ? <div style={{ padding:40 }}><LoadingSpinner text="Loading About content..."/></div> : (
+                  <div style={{ padding:32 }}>
+                    <div className="row g-3">
+                      {/* Hero Subtitle */}
+                      <div className="col-12">
+                        <label style={labelSt}>Hero Subtitle</label>
+                        <textarea className="form-control" rows={2} value={aboutForm.heroSubtitle} onChange={e => handleAboutChange('heroSubtitle', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+
+                      {/* Mission Texts */}
+                      <div className="col-12">
+                        <label style={labelSt}>Mission Paragraph 1</label>
+                        <textarea className="form-control" rows={3} value={aboutForm.missionText1} onChange={e => handleAboutChange('missionText1', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-12">
+                        <label style={labelSt}>Mission Paragraph 2</label>
+                        <textarea className="form-control" rows={3} value={aboutForm.missionText2} onChange={e => handleAboutChange('missionText2', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+
+                      {/* CTA */}
+                      <div className="col-md-6">
+                        <label style={labelSt}>CTA Title</label>
+                        <input className="form-control" value={aboutForm.ctaTitle} onChange={e => handleAboutChange('ctaTitle', e.target.value)}/>
+                      </div>
+                      <div className="col-md-6">
+                        <label style={labelSt}>CTA Subtitle</label>
+                        <input className="form-control" value={aboutForm.ctaSubtitle} onChange={e => handleAboutChange('ctaSubtitle', e.target.value)}/>
+                      </div>
+
+                      {/* Team Members */}
+                      <div className="col-12" style={{ marginTop:16 }}>
+                        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                          <label style={{ ...labelSt, margin:0 }}>Team Members ({(aboutForm.team || []).length})</label>
+                          <button onClick={addTeamMember} style={{ display:'flex', alignItems:'center', gap:5, background:'rgba(0,106,78,0.15)', border:'1px solid rgba(0,106,78,0.3)', color:'var(--primary-light)', padding:'6px 14px', borderRadius:999, cursor:'pointer', fontSize:'0.78rem', fontWeight:700 }}>
+                            <FaUserPlus size={11}/> Add Member
+                          </button>
+                        </div>
+
+                        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                          {(aboutForm.team || []).map((member, i) => (
+                            <div key={i} style={{ background:'var(--dark-3)', border:'1px solid var(--border-color)', borderRadius:14, padding:'16px 18px' }}>
+                              <div className="row g-2 align-items-center">
+                                <div className="col-auto">
+                                  <img src={member.img} alt={member.name} width={44} height={44} style={{ borderRadius:'50%', border:'2px solid var(--primary)', objectFit:'cover' }} onError={e => e.target.src='https://i.pravatar.cc/120?img=1'}/>
+                                </div>
+                                <div className="col">
+                                  <div className="row g-2">
+                                    <div className="col-md-4">
+                                      <input className="form-control form-control-sm" placeholder="Name" value={member.name} onChange={e => handleTeamChange(i, 'name', e.target.value)}/>
+                                    </div>
+                                    <div className="col-md-3">
+                                      <input className="form-control form-control-sm" placeholder="Role" value={member.role} onChange={e => handleTeamChange(i, 'role', e.target.value)}/>
+                                    </div>
+                                    <div className="col-md-5">
+                                      <input className="form-control form-control-sm" placeholder="Image URL" value={member.img} onChange={e => handleTeamChange(i, 'img', e.target.value)}/>
+                                    </div>
+                                    <div className="col-12">
+                                      <input className="form-control form-control-sm" placeholder="Short bio" value={member.bio} onChange={e => handleTeamChange(i, 'bio', e.target.value)}/>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="col-auto">
+                                  <button onClick={() => removeTeamMember(i)} title="Remove" style={{ background:'rgba(244,42,65,0.1)', border:'1px solid rgba(244,42,65,0.3)', color:'#F42A41', width:32, height:32, borderRadius:8, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                    <FaTrash size={12}/>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:28, paddingTop:20, borderTop:'1px solid var(--border-color)' }}>
+                      <button onClick={handleAboutSave} style={saveBtnSt} disabled={pageSaving}>
+                        {pageSaving ? <><span style={spinnerSt}/> Saving...</> : <><FaSave size={13}/> Save About Page</>}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CONTACT PAGE TAB */}
+        {activeTab === 'contact' && (
+          <div className="row justify-content-center">
+            <div className="col-lg-9">
+              <div style={{ background:'var(--card-bg)', border:'1px solid var(--border-color)', borderRadius:20, overflow:'hidden' }}>
+                <div style={{ background:'linear-gradient(135deg, #003d2e 0%, #006A4E 100%)', padding:'24px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+                  <div>
+                    <h4 style={{ fontFamily:'var(--font-heading)', fontWeight:800, color:'#fff', margin:0 }}>📞 Edit Contact Page</h4>
+                    <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.82rem', margin:'4px 0 0' }}>Update contact info, office address, hours</p>
+                  </div>
+                  <div style={{ display:'flex', gap:8 }}>
+                    <button onClick={handleContactReset} style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem' }}>Reset Defaults</button>
+                    <Link to="/contact" target="_blank" style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem', textDecoration:'none', display:'inline-flex', alignItems:'center', gap:5 }}><FaEye size={11}/> Preview</Link>
+                  </div>
+                </div>
+
+                {!contactForm ? <div style={{ padding:40 }}><LoadingSpinner text="Loading Contact content..."/></div> : (
+                  <div style={{ padding:32 }}>
+                    <div className="row g-3">
+                      <div className="col-12">
+                        <label style={labelSt}>Hero Subtitle</label>
+                        <textarea className="form-control" rows={2} value={contactForm.heroSubtitle} onChange={e => handleContactChange('heroSubtitle', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-md-6">
+                        <label style={labelSt}>Office Address</label>
+                        <textarea className="form-control" rows={3} value={contactForm.office} onChange={e => handleContactChange('office', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-md-6">
+                        <label style={labelSt}>Phone Numbers</label>
+                        <textarea className="form-control" rows={3} value={contactForm.phone} onChange={e => handleContactChange('phone', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-md-6">
+                        <label style={labelSt}>Email Addresses</label>
+                        <textarea className="form-control" rows={3} value={contactForm.email} onChange={e => handleContactChange('email', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-md-6">
+                        <label style={labelSt}>Working Hours</label>
+                        <textarea className="form-control" rows={3} value={contactForm.hours} onChange={e => handleContactChange('hours', e.target.value)} style={{ resize:'vertical' }}/>
+                      </div>
+                      <div className="col-12">
+                        <label style={labelSt}>Google Maps Query <span style={{ color:'var(--text-muted)', fontWeight:400 }}>(e.g. Banani,Dhaka,Bangladesh)</span></label>
+                        <input className="form-control" value={contactForm.mapQuery} onChange={e => handleContactChange('mapQuery', e.target.value)}/>
+                      </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:28, paddingTop:20, borderTop:'1px solid var(--border-color)' }}>
+                      <button onClick={handleContactSave} style={saveBtnSt} disabled={pageSaving}>
+                        {pageSaving ? <><span style={spinnerSt}/> Saving...</> : <><FaSave size={13}/> Save Contact Page</>}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* IMAGES TAB */}
+        {activeTab === 'images' && (
+          <div className="row justify-content-center">
+            <div className="col-lg-9">
+              <div style={{ background:'var(--card-bg)', border:'1px solid var(--border-color)', borderRadius:20, overflow:'hidden' }}>
+                <div style={{ background:'linear-gradient(135deg, #003d2e 0%, #006A4E 100%)', padding:'24px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+                  <div>
+                    <h4 style={{ fontFamily:'var(--font-heading)', fontWeight:800, color:'#fff', margin:0 }}>🖼️ Edit Page Images</h4>
+                    <p style={{ color:'rgba(255,255,255,0.65)', fontSize:'0.82rem', margin:'4px 0 0' }}>Home page gallery & About page images</p>
+                  </div>
+                  <div style={{ display:'flex', gap:8 }}>
+                    <button onClick={handleHomeImagesReset} style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem' }}>Reset Defaults</button>
+                    <Link to="/" target="_blank" style={{ ...cancelBtnSt, padding:'8px 14px', fontSize:'0.78rem', textDecoration:'none', display:'inline-flex', alignItems:'center', gap:5 }}><FaEye size={11}/> Preview Home</Link>
+                  </div>
+                </div>
+
+                {!homeImagesForm ? <div style={{ padding:40 }}><LoadingSpinner text="Loading images..."/></div> : (
+                  <div style={{ padding:32 }}>
+                    {/* Why Us Section Images */}
+                    <h6 style={{ fontFamily:'var(--font-heading)', color:'var(--text-primary)', marginBottom:16, fontSize:'0.9rem' }}>Home Page — "Why Travel with VisitBD?" Images (4)</h6>
+                    <div className="row g-3 mb-4">
+                      {(homeImagesForm.whyUsImages || []).map((url, i) => (
+                        <div key={i} className="col-md-6">
+                          <label style={labelSt}>Image {i + 1}</label>
+                          <input className="form-control form-control-sm mb-2" placeholder="Image URL" value={url} onChange={e => handleHomeImageChange(i, e.target.value)}/>
+                          {url && <img src={url} alt={`Why Us ${i+1}`} style={{ width:'100%', height:120, objectFit:'cover', borderRadius:10, border:'1px solid var(--border-color)' }} onError={e => e.target.style.display='none'}/>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* About Page Mission Image */}
+                    <div style={{ borderTop:'1px solid var(--border-color)', paddingTop:20, marginTop:8 }}>
+                      <h6 style={{ fontFamily:'var(--font-heading)', color:'var(--text-primary)', marginBottom:16, fontSize:'0.9rem' }}>About Page — Mission Section Image</h6>
+                      <div className="row g-3">
+                        <div className="col-12">
+                          <label style={labelSt}>Image URL</label>
+                          <input className="form-control" placeholder="Image URL" value={homeImagesForm.aboutMissionImage || ''} onChange={e => handleAboutImageChange(e.target.value)}/>
+                        </div>
+                        {homeImagesForm.aboutMissionImage && (
+                          <div className="col-12">
+                            <img src={homeImagesForm.aboutMissionImage} alt="About Mission" style={{ width:'100%', height:180, objectFit:'cover', borderRadius:12, border:'1px solid var(--border-color)' }} onError={e => e.target.style.display='none'}/>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:28, paddingTop:20, borderTop:'1px solid var(--border-color)' }}>
+                      <button onClick={handleHomeImagesSave} style={saveBtnSt} disabled={pageSaving}>
+                        {pageSaving ? <><span style={spinnerSt}/> Saving...</> : <><FaSave size={13}/> Save Images</>}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
