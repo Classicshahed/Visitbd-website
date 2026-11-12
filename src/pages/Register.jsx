@@ -36,8 +36,7 @@ function Register() {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    const result = register(form.name.trim(), form.email, form.password);
+    const result = await register(form.name.trim(), form.email, form.password);
     setLoading(false);
     if (result.success) {
       setSuccess(true);

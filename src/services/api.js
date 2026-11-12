@@ -1,163 +1,256 @@
 // src/services/api.js
-// Dummy API Service — simulates REST with delay, full CRUD for ALL destinations
+// Production API Service — connects to the VisitBD SQLite / REST Database Backend (/api/*)
+// Includes graceful fallback if running on static-only hosting
 
-const API_BASE = '/data/destinations.json';
-const ADMIN_KEY = 'bd_tourism_admin_destinations';  // Admin-added destinations
-const EDITS_KEY = 'bd_tourism_edited_destinations'; // Overrides for any destination
-const DELETED_KEY = 'bd_tourism_deleted_ids';       // IDs to exclude
+const STATIC_JSON = '/data/destinations.json';
 
-const delay = (ms = 600) => new Promise(res => setTimeout(res, ms + Math.random() * 150));
+async function apiRequest(endpoint, options = {}) {
+  const token = localStorage.getItem('bd_tourism_token');
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
 
-// ── Storage helpers ────────────────────────────────────────────────
-function getAdminDestinations() {
-  try { return JSON.parse(localStorage.getItem(ADMIN_KEY) || '[]'); } catch { return []; }
+  const res = await fetch(endpoint, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `HTTP Error ${res.status}`);
+  }
+  return data;
 }
-function saveAdminDestinations(list) { localStorage.setItem(ADMIN_KEY, JSON.stringify(list)); }
 
-function getEdits() {
-  try { return JSON.parse(localStorage.getItem(EDITS_KEY) || '{}'); } catch { return {}; }
-}
-function saveEdits(obj) { localStorage.setItem(EDITS_KEY, JSON.stringify(obj)); }
-
-function getDeletedIds() {
-  try { return JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'); } catch { return []; }
-}
-function saveDeletedIds(arr) { localStorage.setItem(DELETED_KEY, JSON.stringify(arr)); }
-
-// ── GET All Destinations ───────────────────────────────────────────
+// ── DESTINATIONS CRUD ──────────────────────────────────────────────
 export async function fetchDestinations() {
-  await delay();
   try {
-    const res = await fetch(API_BASE);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const base = await res.json();
-    const edits = getEdits();
-    const deletedIds = getDeletedIds();
-    const adminAdded = getAdminDestinations();
-
-    // Apply edits to base destinations
-    const processed = base
-      .filter(d => !deletedIds.includes(d.id))
-      .map(d => edits[d.id] ? { ...d, ...edits[d.id] } : d);
-
-    // Merge admin-added (also filter deleted)
-    const adminFiltered = adminAdded.filter(d => !deletedIds.includes(d.id))
-      .map(d => edits[d.id] ? { ...d, ...edits[d.id] } : d);
-
-    return [...processed, ...adminFiltered];
-  } catch (err) {
-    throw new Error('Failed to fetch destinations. Please retry.');
+    return await apiRequest('/api/destinations');
+  } catch {
+    const res = await fetch(STATIC_JSON);
+    if (!res.ok) throw new Error('Failed to fetch destinations.');
+    return await res.json();
   }
 }
 
-// ── GET Single Destination ─────────────────────────────────────────
 export async function fetchDestinationById(id) {
-  await delay(300);
-  const all = await fetchDestinations();
-  const found = all.find(d => d.id === parseInt(id) || d.id === id);
-  if (!found) throw new Error('Destination not found.');
-  return found;
-}
-
-// ── POST Add Destination (Admin) ───────────────────────────────────
-export async function addDestination(data) {
-  await delay(700);
-  const admin = getAdminDestinations();
-  const newDest = {
-    ...data,
-    id: Date.now(),
-    rating: parseFloat(data.rating) || 4.0,
-    price: parseInt(data.price) || 1000,
-    featured: false,
-    adminCreated: true,
-    createdAt: new Date().toISOString(),
-  };
-  admin.push(newDest);
-  saveAdminDestinations(admin);
-  return newDest;
-}
-
-// ── PUT Edit Destination (Any) ─────────────────────────────────────
-export async function editDestination(id, data) {
-  await delay(500);
-  const edits = getEdits();
-  edits[id] = { ...edits[id], ...data, updatedAt: new Date().toISOString() };
-  saveEdits(edits);
-
-  // Also update admin-added list if it's one of those
-  const admin = getAdminDestinations();
-  const idx = admin.findIndex(d => d.id === id);
-  if (idx !== -1) {
-    admin[idx] = { ...admin[idx], ...data, updatedAt: new Date().toISOString() };
-    saveAdminDestinations(admin);
+  try {
+    return await apiRequest(`/api/destinations/${id}`);
+  } catch {
+    const all = await fetchDestinations();
+    const found = all.find((d) => d.id === parseInt(id, 10) || d.id === id);
+    if (!found) throw new Error('Destination not found.');
+    return { ...found, reviews: [] };
   }
-  return { success: true };
 }
 
-// ── DELETE Destination (Any) ───────────────────────────────────────
+export async function addDestination(data) {
+  return await apiRequest('/api/destinations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function editDestination(id, data) {
+  return await apiRequest(`/api/destinations/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 export async function deleteDestination(id) {
-  await delay(400);
-  const deletedIds = getDeletedIds();
-  if (!deletedIds.includes(id)) deletedIds.push(id);
-  saveDeletedIds(deletedIds);
-
-  // Also remove from admin list if present
-  const admin = getAdminDestinations();
-  saveAdminDestinations(admin.filter(d => d.id !== id));
-  return { success: true };
+  return await apiRequest(`/api/destinations/${id}`, {
+    method: 'DELETE',
+  });
 }
 
-// ── Stats ──────────────────────────────────────────────────────────
+export async function resetDestinations() {
+  return await apiRequest('/api/destinations/reset', {
+    method: 'POST',
+  });
+}
+
+// ── STATS ──────────────────────────────────────────────────────────
 export async function fetchStats() {
-  await delay(300);
-  const all = await fetchDestinations();
-  return {
-    total: all.length,
-    featured: all.filter(d => d.featured).length,
-    adminAdded: getAdminDestinations().filter(d => !getDeletedIds().includes(d.id)).length,
-    categories: [...new Set(all.map(d => d.category))].length,
-    edited: Object.keys(getEdits()).length,
-    deleted: getDeletedIds().length,
-  };
+  return await apiRequest('/api/stats');
 }
 
-// ── About Page Content ────────────────────────────────────────────
-const ABOUT_KEY = 'bd_tourism_about_content';
+// ── AUTHENTICATION & USERS ─────────────────────────────────────────
+export async function loginUser(email, password) {
+  return await apiRequest('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
 
+export async function registerUser(name, email, password) {
+  return await apiRequest('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  });
+}
+
+export async function updateUserProfile(data) {
+  return await apiRequest('/api/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchUsers() {
+  return await apiRequest('/api/users');
+}
+
+// ── REVIEWS ────────────────────────────────────────────────────────
+export async function fetchReviews(destinationId) {
+  const qs = destinationId ? `?destinationId=${destinationId}` : '';
+  return await apiRequest(`/api/reviews${qs}`);
+}
+
+export async function addReview(data) {
+  return await apiRequest('/api/reviews', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteReview(id) {
+  return await apiRequest(`/api/reviews/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ── BOOKINGS (TRIP PLANNER) ────────────────────────────────────────
+export async function fetchBookings(userId) {
+  const qs = userId ? `?userId=${userId}` : '';
+  return await apiRequest(`/api/bookings${qs}`);
+}
+
+export async function createBooking(data) {
+  return await apiRequest('/api/bookings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateBookingStatus(id, status) {
+  return await apiRequest(`/api/bookings/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function deleteBooking(id) {
+  return await apiRequest(`/api/bookings/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ── WISHLISTS (DB SYNCED) ──────────────────────────────────────────
+export async function fetchUserWishlist(userId) {
+  if (!userId) return [];
+  return await apiRequest(`/api/wishlists?userId=${userId}`);
+}
+
+export async function toggleUserWishlist(userId, destinationId) {
+  return await apiRequest('/api/wishlists/toggle', {
+    method: 'POST',
+    body: JSON.stringify({ userId, destinationId }),
+  });
+}
+
+export async function removeUserWishlistItem(userId, destinationId) {
+  return await apiRequest(`/api/wishlists?userId=${userId}&destinationId=${destinationId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function clearUserWishlist(userId) {
+  return await apiRequest(`/api/wishlists?userId=${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+// ── CONTACT MESSAGES ───────────────────────────────────────────────
+export async function submitContactMessage(data) {
+  return await apiRequest('/api/contact-messages', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchContactMessages() {
+  return await apiRequest('/api/contact-messages');
+}
+
+export async function updateContactMessageStatus(id, status) {
+  return await apiRequest(`/api/contact-messages/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function deleteContactMessage(id) {
+  return await apiRequest(`/api/contact-messages/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ── SITE SETTINGS (ABOUT / CONTACT / HOME IMAGES) ──────────────────
 export const DEFAULT_ABOUT = {
-  heroSubtitle: 'We are a team of passionate Bangladeshi travelers on a mission to showcase the breathtaking beauty of our homeland to the world — one destination at a time.',
-  missionText1: 'Bangladesh is one of the world\'s most underrated travel destinations. From the world\'s longest sea beach to a UNESCO-listed mangrove forest to cloud-capped hill stations, the country is overflowing with natural and cultural wonders.',
-  missionText2: 'We built VisitBD to change that narrative. Our goal is simple: make Bangladesh a must-visit destination on every traveler\'s list, starting with its own people.',
+  heroSubtitle:
+    'We are a team of passionate Bangladeshi travelers on a mission to showcase the breathtaking beauty of our homeland to the world — one destination at a time.',
+  missionText1:
+    "Bangladesh is one of the world's most underrated travel destinations. From the world's longest sea beach to a UNESCO-listed mangrove forest to cloud-capped hill stations, the country is overflowing with natural and cultural wonders.",
+  missionText2:
+    "We built VisitBD to change that narrative. Our goal is simple: make Bangladesh a must-visit destination on every traveler's list, starting with its own people.",
   ctaTitle: 'Ready to Explore Bangladesh?',
-  ctaSubtitle: 'Join thousands of travelers who have already discovered the magic of Bangladesh through VisitBD.',
+  ctaSubtitle:
+    'Join thousands of travelers who have already discovered the magic of Bangladesh through VisitBD.',
   team: [
-    { name: 'Rafiqul Islam', role: 'Founder & CEO', img: 'https://i.pravatar.cc/120?img=11', bio: 'Passionate traveler who has explored all 64 districts of Bangladesh.' },
-    { name: 'Nusrat Jahan', role: 'Head of Content', img: 'https://i.pravatar.cc/120?img=47', bio: 'Travel writer and photographer with 8 years of experience.' },
-    { name: 'Tanvir Ahmed', role: 'Tech Lead', img: 'https://i.pravatar.cc/120?img=15', bio: 'Building seamless digital experiences for travelers.' },
-    { name: 'Maliha Rahman', role: 'Community Manager', img: 'https://i.pravatar.cc/120?img=44', bio: 'Connecting travelers and building our growing community.' },
+    {
+      name: 'Rafiqul Islam',
+      role: 'Founder & CEO',
+      img: 'https://i.pravatar.cc/120?img=11',
+      bio: 'Passionate traveler who has explored all 64 districts of Bangladesh.',
+    },
+    {
+      name: 'Nusrat Jahan',
+      role: 'Head of Content',
+      img: 'https://i.pravatar.cc/120?img=47',
+      bio: 'Travel writer and photographer with 8 years of experience.',
+    },
+    {
+      name: 'Tanvir Ahmed',
+      role: 'Tech Lead',
+      img: 'https://i.pravatar.cc/120?img=15',
+      bio: 'Building seamless digital experiences for travelers.',
+    },
+    {
+      name: 'Maliha Rahman',
+      role: 'Community Manager',
+      img: 'https://i.pravatar.cc/120?img=44',
+      bio: 'Connecting travelers and building our growing community.',
+    },
   ],
 };
 
 export async function fetchAboutContent() {
-  await delay(200);
   try {
-    const saved = localStorage.getItem(ABOUT_KEY);
-    if (saved) return { ...DEFAULT_ABOUT, ...JSON.parse(saved) };
-  } catch {}
-  return { ...DEFAULT_ABOUT };
+    return await apiRequest('/api/settings/about_content');
+  } catch {
+    return { ...DEFAULT_ABOUT };
+  }
 }
 
 export async function saveAboutContent(data) {
-  await delay(400);
-  localStorage.setItem(ABOUT_KEY, JSON.stringify(data));
-  return { success: true };
+  return await apiRequest('/api/settings/about_content', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
 
-// ── Contact Page Content ──────────────────────────────────────────
-const CONTACT_KEY = 'bd_tourism_contact_content';
-
 export const DEFAULT_CONTACT = {
-  heroSubtitle: 'Have a question, partnership idea, or just want to say hello? We\'d love to hear from you!',
+  heroSubtitle:
+    "Have a question, partnership idea, or just want to say hello? We'd love to hear from you!",
   office: 'Level 5, Banani Tower\nDhaka-1213, Bangladesh',
   phone: '+880 1700 000000\n+880 1800 000000',
   email: 'info@visitbd.com\nsupport@visitbd.com',
@@ -166,22 +259,19 @@ export const DEFAULT_CONTACT = {
 };
 
 export async function fetchContactContent() {
-  await delay(200);
   try {
-    const saved = localStorage.getItem(CONTACT_KEY);
-    if (saved) return { ...DEFAULT_CONTACT, ...JSON.parse(saved) };
-  } catch {}
-  return { ...DEFAULT_CONTACT };
+    return await apiRequest('/api/settings/contact_content');
+  } catch {
+    return { ...DEFAULT_CONTACT };
+  }
 }
 
 export async function saveContactContent(data) {
-  await delay(400);
-  localStorage.setItem(CONTACT_KEY, JSON.stringify(data));
-  return { success: true };
+  return await apiRequest('/api/settings/contact_content', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
-
-// ── Home Page Images Content ──────────────────────────────────────
-const HOME_IMAGES_KEY = 'bd_tourism_home_images';
 
 export const DEFAULT_HOME_IMAGES = {
   whyUsImages: [
@@ -194,17 +284,16 @@ export const DEFAULT_HOME_IMAGES = {
 };
 
 export async function fetchHomeImages() {
-  await delay(200);
   try {
-    const saved = localStorage.getItem(HOME_IMAGES_KEY);
-    if (saved) return { ...DEFAULT_HOME_IMAGES, ...JSON.parse(saved) };
-  } catch {}
-  return { ...DEFAULT_HOME_IMAGES };
+    return await apiRequest('/api/settings/home_images');
+  } catch {
+    return { ...DEFAULT_HOME_IMAGES };
+  }
 }
 
 export async function saveHomeImages(data) {
-  await delay(400);
-  localStorage.setItem(HOME_IMAGES_KEY, JSON.stringify(data));
-  return { success: true };
+  return await apiRequest('/api/settings/home_images', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
-

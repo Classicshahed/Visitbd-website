@@ -27,8 +27,7 @@ function Login() {
     e.preventDefault();
     if (!form.email || !form.password) { setError('Please fill in all fields.'); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600)); // simulate delay
-    const result = login(form.email, form.password);
+    const result = await login(form.email, form.password);
     setLoading(false);
     if (result.success) {
       navigate(from, { replace: true });

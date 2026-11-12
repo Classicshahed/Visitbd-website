@@ -37,8 +37,13 @@ function About() {
       {/* Hero */}
       <div style={{ background: 'var(--dark-2)', borderBottom: '1px solid var(--border-color)', padding: '60px 0' }}>
         <div className="container text-center" style={{ maxWidth: 760 }}>
-          <div className="section-badge mx-auto">🇧🇩 Our Story</div>
-          <h1 className="section-title mt-2 mb-3">About VisitBD</h1>
+          <div className="section-badge mx-auto">Our Chronicle</div>
+          <h1 className="section-title mt-2 mb-3">
+            Documenting the Living Landscapes of{' '}
+            <span className="font-serif-editorial" style={{ color: 'var(--gold-light)', fontSize: '1.08em' }}>
+              Bengal
+            </span>
+          </h1>
           <p className="section-subtitle">
             {content.heroSubtitle}
           </p>
@@ -50,7 +55,7 @@ function About() {
         <div className="container" style={{ maxWidth: 1280 }}>
           <div className="row g-5 align-items-center">
             <div className="col-lg-6">
-              <div className="section-badge">🎯 Mission</div>
+              <div className="section-badge">Field Mission</div>
               <h2 className="section-title mt-2 mb-3">Why We Built VisitBD</h2>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.8, marginBottom: 20 }}>
                 {content.missionText1}

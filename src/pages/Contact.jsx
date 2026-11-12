@@ -1,8 +1,9 @@
 // src/pages/Contact.jsx
 import React, { useState, useEffect } from 'react';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebook, FaInstagram, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
-import { fetchContactContent } from '../services/api';
+import { fetchContactContent, submitContactMessage } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MapView from '../components/MapView';
 
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -10,9 +11,22 @@ function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState(null);
+  const [officeCoords, setOfficeCoords] = useState({ lat: 23.7937, lng: 90.4066 });
 
   useEffect(() => {
-    fetchContactContent().then(setContent);
+    fetchContactContent().then((data) => {
+      setContent(data);
+      if (data?.mapQuery) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(data.mapQuery)}`)
+          .then((r) => r.json())
+          .then((res) => {
+            if (Array.isArray(res) && res[0]) {
+              setOfficeCoords({ lat: parseFloat(res[0].lat), lng: parseFloat(res[0].lon) });
+            }
+          })
+          .catch(() => {});
+      }
+    });
   }, []);
 
   const validate = () => {
@@ -34,9 +48,14 @@ function Contact() {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      await submitContactMessage(form);
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ message: err.message || 'Failed to send message. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!content) {
@@ -146,12 +165,19 @@ function Contact() {
               )}
             </div>
 
-            {/* Map */}
-            <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--border-color)', height: 240, marginTop: 24 }}>
-              <iframe
-                title="VisitBD Office Location"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(content.mapQuery)}&z=13&output=embed`}
-                width="100%" height="100%" style={{ border: 0 }} loading="lazy"
+            {/* Free Interactive OpenStreetMap (No API Key Required) */}
+            <div style={{ marginTop: 24 }}>
+              <MapView
+                height="280px"
+                singleDestination={{
+                  id: 'office',
+                  name: 'VisitBD Headquarters',
+                  division: content.mapQuery || 'Banani, Dhaka',
+                  category: 'Heritage',
+                  lat: officeCoords.lat,
+                  lng: officeCoords.lng,
+                  isOffice: true,
+                }}
               />
             </div>
           </div>

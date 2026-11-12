@@ -1,5 +1,5 @@
 // src/hooks/useLocalStorage.js
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 function useLocalStorage(key, initialValue) {
   const [storedValue, setStoredValue] = useState(() => {
@@ -12,24 +12,29 @@ function useLocalStorage(key, initialValue) {
     }
   });
 
-  const setValue = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`useLocalStorage: Error setting key "${key}":`, error);
-    }
-  };
+  const setValue = useCallback(
+    (value) => {
+      try {
+        setStoredValue((prev) => {
+          const valueToStore = value instanceof Function ? value(prev) : value;
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          return valueToStore;
+        });
+      } catch (error) {
+        console.error(`useLocalStorage: Error setting key "${key}":`, error);
+      }
+    },
+    [key]
+  );
 
-  const removeValue = () => {
+  const removeValue = useCallback(() => {
     try {
       setStoredValue(initialValue);
       window.localStorage.removeItem(key);
     } catch (error) {
       console.error(`useLocalStorage: Error removing key "${key}":`, error);
     }
-  };
+  }, [key, initialValue]);
 
   return [storedValue, setValue, removeValue];
 }

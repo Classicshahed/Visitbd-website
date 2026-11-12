@@ -69,14 +69,19 @@ function Destinations() {
   return (
     <div className="page-wrapper" style={{ background: 'var(--dark)', minHeight: '100vh' }}>
       {/* Page Header */}
-      <div style={{ background: 'var(--dark-2)', borderBottom: '1px solid var(--border-color)', padding: '48px 0 32px' }}>
+      <div style={{ background: 'var(--dark-2)', borderBottom: '1px solid var(--border-color)', padding: '56px 0 36px' }}>
         <div className="container" style={{ maxWidth: 1280 }}>
           <div className="d-flex align-items-end justify-content-between flex-wrap gap-3">
             <div>
-              <div className="section-badge">🌏 Explore Bangladesh</div>
-              <h1 className="section-title mt-2 mb-1">All Destinations</h1>
-              <p className="section-subtitle" style={{ maxWidth: 480, marginBottom: 0 }}>
-                From pristine beaches to misty hills — discover every corner of beautiful Bangladesh.
+              <div className="section-badge">Destination Atlas</div>
+              <h1 className="section-title mt-1 mb-2">
+                Explore Every Landscape of{' '}
+                <span className="font-serif-editorial" style={{ color: 'var(--gold-light)', fontSize: '1.08em' }}>
+                  Bangladesh
+                </span>
+              </h1>
+              <p className="section-subtitle" style={{ maxWidth: 520, marginBottom: 0 }}>
+                Filter by division, terrain category, transit mode, and budget across verified field dossiers.
               </p>
             </div>
 

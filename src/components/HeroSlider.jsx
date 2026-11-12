@@ -1,202 +1,357 @@
 // src/components/HeroSlider.jsx
+// Editorial Expedition Showcase — Non-AI High-Craft Hero Architecture
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaPlay, FaPause, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaArrowRight, FaPlay, FaPause } from 'react-icons/fa';
 
 const SLIDES = [
   {
-    id: 3,
-    title: "Home of the",
-    titleHighlight: "Spotted Deer",
-    subtitle: "The Sundarbans",
-    description: "The world's largest mangrove forest — a UNESCO World Heritage site teeming with wildlife, including the graceful spotted deer.",
-    image: "/sundarbans_hero.png",
-    location: "Khulna Division",
-    cta: "/destinations/2",
-    badge: "🌿 UNESCO Heritage",
+    id: 2,
+    index: '01',
+    eyebrow: 'UNESCO BIOSPHERE · KHULNA DIVISION',
+    coords: '21.9497° N, 89.1833° E',
+    subtitle: 'The Sundarbans',
+    titleItalic: 'Tidal Mangrove Sanctuary',
+    description:
+      'Navigate an ancient labyrinth of tidal waterways and mist-covered estuaries—home to the Royal Bengal Tiger and the largest halophytic mangrove forest on Earth.',
+    image: '/sundarbans_hero.png',
+    cta: '/destinations/2',
+    season: 'Oct — Mar',
+    duration: '3–4 Days',
   },
   {
     id: 1,
-    title: "World's Longest",
-    titleHighlight: "Sea Beach",
+    index: '02',
+    eyebrow: 'BAY OF BENGAL · CHITTAGONG COAST',
+    coords: '21.4272° N, 92.0058° E',
     subtitle: "Cox's Bazar",
-    description: "Relax under a beach umbrella on 120 kilometers of unbroken golden sand. Experience the beauty of the world's longest natural sea beach.",
-    image: "/coxs_bazar_hero.png",
-    location: "Chittagong Division",
-    cta: "/destinations/1",
-    badge: "🏖️ Most Popular",
+    titleItalic: '120 Kilometers of Unbroken Coast',
+    description:
+      'Where emerald coastal cliffs meet the warm swells of the Bay of Bengal along the longest unbroken natural sea beach in the world.',
+    image: '/coxs_bazar_hero.png',
+    cta: '/destinations/1',
+    season: 'Nov — Mar',
+    duration: '3–5 Days',
   },
   {
-    id: 2,
-    title: "Queen of",
-    titleHighlight: "the Hills",
-    subtitle: "Sajek Valley",
-    description: "Clouds drift below your feet at 1800 feet above sea level. Wake up to a sea of clouds at sunrise over the Chittagong Hill Tracts.",
-    image: "/sajek.jpg",
-    location: "Rangamati District",
-    cta: "/destinations/3",
-    badge: "⛰️ Top Rated",
+    id: 3,
+    index: '03',
+    eyebrow: 'LUSAI HILLS · RANGAMATI',
+    coords: '23.3791° N, 92.2940° E',
+    subtitle: 'Sajek Valley',
+    titleItalic: 'Above the Monsoon Cloud Sea',
+    description:
+      'Perched 1,800 feet along the Chittagong Hill Tracts ridge, watch dawn break over a rolling ocean of clouds across indigenous hill settlements.',
+    image: '/sajek.jpg',
+    cta: '/destinations/3',
+    season: 'Oct — Apr',
+    duration: '2–3 Days',
   },
 ];
 
 function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const goTo = useCallback((index) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
     setCurrent(index);
-    setTimeout(() => setIsAnimating(false), 600);
-  }, [isAnimating]);
+  }, []);
 
-  const next = useCallback(() => goTo((current + 1) % SLIDES.length), [current, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
+  const next = useCallback(() => {
+    setCurrent((prev) => (prev + 1) % SLIDES.length);
+  }, []);
 
   useEffect(() => {
     if (!isPlaying) return;
-    const timer = setInterval(next, 5500);
+    const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [isPlaying, next]);
 
   const slide = SLIDES[current];
 
   return (
-    <div style={heroStyle} id="hero-slider">
-      {/* Background images */}
+    <section
+      id="hero-slider"
+      style={{
+        position: 'relative',
+        minHeight: '92vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        overflow: 'hidden',
+        background: 'var(--dark)',
+        paddingTop: 90,
+      }}
+    >
+      {/* Background photographic plates with subtle scale transition */}
       {SLIDES.map((s, i) => (
         <div
           key={s.id}
           style={{
-            position: 'absolute', inset: 0,
+            position: 'absolute',
+            inset: 0,
             backgroundImage: `url(${s.image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: i === current ? 1 : 0,
-            transition: 'opacity 0.8s ease',
+            transform: i === current ? 'scale(1.03)' : 'scale(1)',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 6s ease-out',
             zIndex: 0,
           }}
         />
       ))}
 
-      {/* Dark overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'var(--gradient-hero)', zIndex: 1 }} />
+      {/* Multi-layered editorial vignette */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(90deg, rgba(10,14,12,0.88) 0%, rgba(10,14,12,0.52) 55%, rgba(10,14,12,0.3) 100%), linear-gradient(180deg, rgba(10,14,12,0.4) 0%, transparent 35%, rgba(10,14,12,0.96) 100%)',
+          zIndex: 1,
+        }}
+      />
 
-      {/* Content */}
-      <div className="container h-100 d-flex align-items-center" style={{ position: 'relative', zIndex: 2, maxWidth: 1280 }}>
-        <div className="col-lg-8 col-md-10" key={current} style={{ animation: 'heroEnter 0.7s ease forwards' }}>
-          {/* Badge */}
-          <div className="section-badge mb-3" style={{ display: 'inline-flex' }}>
-            <span>{slide.badge}</span>
-          </div>
-
-          {/* Location */}
-          <div className="d-flex align-items-center gap-2 mb-2">
-            <FaMapMarkerAlt size={13} color="var(--accent)" />
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{slide.location}</span>
-          </div>
-
-          {/* Title */}
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1rem, 2.5vw, 1.3rem)', color: 'var(--text-secondary)', fontWeight: 400, marginBottom: 4 }}>
-              {slide.title}
-            </p>
-            <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(2.5rem, 7vw, 5.5rem)', fontWeight: 800, lineHeight: 1.05, marginBottom: 0 }}>
-              <span className="gradient-text">{slide.subtitle}</span>
-            </h1>
-            <p style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.2rem, 3vw, 2rem)', color: 'var(--gold)', fontWeight: 600, marginTop: 4 }}>
-              {slide.titleHighlight}
-            </p>
-          </div>
-
-          {/* Description */}
-          <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', lineHeight: 1.7, maxWidth: 560, marginBottom: 32 }}>
-            {slide.description}
-          </p>
-
-          {/* CTAs */}
-          <div className="d-flex gap-3 flex-wrap">
-            <Link to={slide.cta} className="btn-primary-bd btn" style={{ padding: '14px 32px', fontSize: '0.95rem' }}>
-              Explore Now →
-            </Link>
-            <Link to="/destinations" className="btn btn-outline-bd" style={{ padding: '14px 32px', fontSize: '0.95rem' }}>
-              All Destinations
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div style={{ position: 'absolute', bottom: 40, left: 0, right: 0, zIndex: 3 }}>
-        <div className="container d-flex align-items-center justify-content-between" style={{ maxWidth: 1280 }}>
-          {/* Dots */}
-          <div className="d-flex gap-2">
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
+      {/* Main Editorial Content */}
+      <div
+        className="container my-auto py-5"
+        style={{ position: 'relative', zIndex: 2, maxWidth: 1280 }}
+      >
+        <div className="row align-items-end">
+          <div className="col-lg-8" key={slide.id} style={{ animation: 'heroReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+            {/* Top Geographic Metadata Row */}
+            <div className="d-flex align-items-center gap-3 flex-wrap mb-3">
+              <span
                 style={{
-                  width: i === current ? 28 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  border: 'none',
-                  background: i === current ? 'var(--primary-light)' : 'rgba(255,255,255,0.3)',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  padding: 0,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.72rem',
+                  letterSpacing: '0.14em',
+                  color: 'var(--gold)',
+                  textTransform: 'uppercase',
                 }}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
+              >
+                {slide.eyebrow}
+              </span>
+              <span style={{ color: 'rgba(244,245,240,0.2)' }}>/</span>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.72rem',
+                  color: 'var(--text-secondary)',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {slide.coords}
+              </span>
+            </div>
+
+            {/* Editorial Headline Pair */}
+            <h1
+              style={{
+                fontFamily: 'var(--font-heading)',
+                fontSize: 'clamp(2.75rem, 6.2vw, 5.25rem)',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                lineHeight: 1.02,
+                letterSpacing: '-0.035em',
+                marginBottom: 8,
+              }}
+            >
+              {slide.subtitle}
+            </h1>
+            <div
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontStyle: 'italic',
+                fontSize: 'clamp(1.65rem, 3.4vw, 2.75rem)',
+                color: 'var(--gold-light)',
+                lineHeight: 1.15,
+                marginBottom: 22,
+              }}
+            >
+              {slide.titleItalic}
+            </div>
+
+            {/* Description */}
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: 'clamp(0.95rem, 1.4vw, 1.08rem)',
+                lineHeight: 1.75,
+                maxWidth: 560,
+                marginBottom: 32,
+              }}
+            >
+              {slide.description}
+            </p>
+
+            {/* Actions & Field Notes */}
+            <div className="d-flex align-items-center gap-3 flex-wrap">
+              <Link
+                to={slide.cta}
+                className="btn btn-primary-bd d-inline-flex align-items-center gap-2"
+                style={{ padding: '13px 28px' }}
+              >
+                Explore Dossier <FaArrowRight size={12} />
+              </Link>
+              <Link
+                to="/destinations"
+                className="btn btn-outline-bd"
+                style={{ padding: '12px 24px' }}
+              >
+                All 64 Districts & Sites
+              </Link>
+            </div>
           </div>
 
-          {/* Arrow + play controls */}
-          <div className="d-flex gap-2">
-            <button onClick={() => setIsPlaying(p => !p)} style={controlBtnStyle} aria-label={isPlaying ? 'Pause' : 'Play'}>
-              {isPlaying ? <FaPause size={12} /> : <FaPlay size={12} />}
-            </button>
-            <button onClick={prev} style={controlBtnStyle} aria-label="Previous slide"><FaChevronLeft size={14} /></button>
-            <button onClick={next} style={controlBtnStyle} aria-label="Next slide"><FaChevronRight size={14} /></button>
+          {/* Right Field Spec Box (Desktop) */}
+          <div className="col-lg-4 d-none d-lg-flex justify-content-end">
+            <div
+              style={{
+                background: 'rgba(16, 22, 19, 0.72)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '22px 24px',
+                width: 270,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.68rem',
+                  color: 'var(--text-muted)',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: 14,
+                }}
+              >
+                EXPEDITION BRIEF // {slide.index}
+              </div>
+              <div
+                className="d-flex justify-content-between py-2"
+                style={{ borderTop: '1px solid var(--border-color)' }}
+              >
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Optimal Window</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                  {slide.season}
+                </span>
+              </div>
+              <div
+                className="d-flex justify-content-between py-2"
+                style={{ borderTop: '1px solid var(--border-color)' }}
+              >
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Recommended</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                  {slide.duration}
+                </span>
+              </div>
+              <div
+                className="d-flex justify-content-between pt-2"
+                style={{ borderTop: '1px solid var(--border-color)' }}
+              >
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem', color: 'var(--primary-light)' }}>
+                  ● Open for Travel
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Slide counter */}
-      <div style={{ position: 'absolute', top: 90, right: 40, zIndex: 3 }}>
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-          0{current + 1} / 0{SLIDES.length}
-        </span>
+      {/* Bottom Architectural Index Bar */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          borderTop: '1px solid var(--border-color)',
+          background: 'rgba(10, 14, 12, 0.65)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div className="container" style={{ maxWidth: 1280 }}>
+          <div className="row g-0 align-items-center">
+            {SLIDES.map((s, i) => {
+              const active = i === current;
+              return (
+                <div key={s.id} className="col-4">
+                  <button
+                    onClick={() => goTo(i)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      borderTop: active ? '2px solid var(--gold)' : '2px solid transparent',
+                      padding: '16px 14px',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)',
+                      opacity: active ? 1 : 0.55,
+                    }}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.7rem',
+                          color: active ? 'var(--gold)' : 'var(--text-muted)',
+                        }}
+                      >
+                        {s.index}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-heading)',
+                          fontWeight: 600,
+                          fontSize: '0.86rem',
+                          color: 'var(--text-primary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {s.subtitle}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <button
+          onClick={() => setIsPlaying((p) => !p)}
+          aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+          style={{
+            position: 'absolute',
+            right: 20,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'none',
+            border: '1px solid var(--border-color)',
+            color: 'var(--text-secondary)',
+            width: 32,
+            height: 32,
+            borderRadius: 'var(--radius-sm)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          {isPlaying ? <FaPause size={10} /> : <FaPlay size={10} />}
+        </button>
       </div>
 
       <style>{`
-        @keyframes heroEnter {
-          from { opacity: 0; transform: translateY(24px); }
+        @keyframes heroReveal {
+          from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-    </div>
+    </section>
   );
 }
-
-const heroStyle = {
-  position: 'relative',
-  height: '100vh',
-  minHeight: 600,
-  overflow: 'hidden',
-  marginTop: -70,
-};
-
-const controlBtnStyle = {
-  width: 38, height: 38,
-  borderRadius: '50%',
-  border: '1px solid rgba(255,255,255,0.2)',
-  background: 'rgba(13,27,42,0.5)',
-  backdropFilter: 'blur(8px)',
-  color: 'rgba(255,255,255,0.8)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  cursor: 'pointer',
-  transition: 'var(--transition)',
-};
 
 export default HeroSlider;

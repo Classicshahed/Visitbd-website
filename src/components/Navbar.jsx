@@ -1,9 +1,10 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FaGlobeAsia, FaHeart, FaUser, FaSignOutAlt, FaBars, FaTimes, FaTachometerAlt, FaUserShield } from 'react-icons/fa';
+import { FaGlobeAsia, FaHeart, FaUser, FaSignOutAlt, FaBars, FaTimes, FaTachometerAlt, FaUserShield, FaSearch } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useBooking } from '../context/BookingContext';
+import CommandPalette from './CommandPalette';
 import logo from '../assets/logo.png';
 
 function Navbar() {
@@ -13,6 +14,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -31,11 +33,11 @@ function Navbar() {
     top: 0, left: 0, right: 0,
     zIndex: 1000,
     background: scrolled
-      ? 'rgba(13,27,42,0.95)'
-      : 'rgba(13,27,42,0.4)',
+      ? 'rgba(10, 14, 12, 0.92)'
+      : 'rgba(10, 14, 12, 0.45)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
-    borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
+    borderBottom: scrolled ? '1px solid rgba(244, 245, 240, 0.08)' : '1px solid rgba(244, 245, 240, 0.04)',
     transition: 'all 0.4s ease',
     padding: '0 0',
   };
@@ -71,6 +73,41 @@ function Navbar() {
 
           {/* Right Side */}
           <div className="d-none d-lg-flex align-items-center gap-3">
+            {/* Command Menu Trigger (Ctrl+K) */}
+            <button
+              onClick={() => setCmdOpen(true)}
+              title="Quick Search (Ctrl+K)"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                background: 'rgba(244, 245, 240, 0.04)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '6px 11px',
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'var(--transition)',
+              }}
+            >
+              <FaSearch size={11} color="var(--gold)" />
+              <span>Search...</span>
+              <kbd
+                style={{
+                  background: 'var(--dark-3)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 4,
+                  padding: '1px 5px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.64rem',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                Ctrl K
+              </kbd>
+            </button>
+
             {/* Wishlist */}
             <Link to={isAuthenticated ? '/dashboard' : '/login'} style={{ position: 'relative', color: 'var(--text-secondary)', transition: 'var(--transition)' }} title="My Wishlist">
               <FaHeart size={17} />
@@ -167,6 +204,7 @@ function Navbar() {
           </div>
         )}
       </div>
+      <CommandPalette open={cmdOpen} onClose={(arg) => setCmdOpen(arg === 'toggle-open')} />
     </nav>
   );
 }

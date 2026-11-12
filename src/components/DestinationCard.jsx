@@ -1,212 +1,255 @@
 // src/components/DestinationCard.jsx
+// Editorial Travel Card — Non-AI High-Craft Component
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaStar, FaMapMarkerAlt, FaClock, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaStar, FaHeart, FaRegHeart, FaArrowRight } from 'react-icons/fa';
 import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
 
 function DestinationCard({ destination, className = '' }) {
   const { toggleWishlist, isWishlisted } = useBooking();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const wishlisted = isWishlisted(destination.id);
 
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
     toggleWishlist(destination);
   };
 
   const formatPrice = (price) =>
-    new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'BDT', maximumFractionDigits: 0 })
-      .format(price)
-      .replace('BDT', '৳');
+    `৳${Number(price || 0).toLocaleString('en-BD')}`;
 
   return (
-    <div className={`destination-card ${className}`} style={cardStyle}>
-      {/* Image */}
-      <div style={{ position: 'relative', overflow: 'hidden', height: '220px' }}>
+    <article
+      className={`destination-card ${className}`}
+      style={{
+        background: 'var(--card-bg)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+        transition: 'var(--transition)',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Image Container */}
+      <Link
+        to={`/destinations/${destination.id}`}
+        style={{
+          position: 'relative',
+          display: 'block',
+          overflow: 'hidden',
+          height: 230,
+          textDecoration: 'none',
+        }}
+      >
         <img
           src={destination.image}
           alt={destination.name}
-          style={{
-            width: '100%', height: '100%', objectFit: 'cover',
-            transition: 'transform 0.5s ease',
-          }}
           className="card-img"
           loading="lazy"
-          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80'; }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+          onError={(e) => {
+            e.target.src =
+              'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80';
+          }}
         />
-        {/* Gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'var(--gradient-card)' }} />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'var(--gradient-card)',
+          }}
+        />
 
-        {/* Category pill */}
+        {/* Top Left: Single Clean Category Tag */}
         <div style={{ position: 'absolute', top: 14, left: 14 }}>
           <span className="category-pill">{destination.category}</span>
         </div>
 
-        {/* Wishlist button */}
+        {/* Top Right: Tactile Wishlist Button */}
         <button
           onClick={handleWishlist}
-          style={wishlistBtnStyle(wishlisted)}
-          title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
           aria-label="Toggle wishlist"
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            width: 34,
+            height: 34,
+            borderRadius: '50%',
+            background: wishlisted ? 'var(--accent)' : 'rgba(10, 14, 12, 0.65)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(244, 245, 240, 0.14)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'var(--transition)',
+          }}
         >
-          {wishlisted ? <FaHeart size={15} /> : <FaRegHeart size={15} />}
+          {wishlisted ? <FaHeart size={13} /> : <FaRegHeart size={13} />}
         </button>
 
-        {/* Featured badge */}
-        {destination.featured && (
-          <div style={{ position: 'absolute', bottom: 14, left: 14 }}>
-            <span className="badge-gold" style={{ fontSize: '0.68rem' }}>⭐ Featured</span>
+        {/* Bottom Left: Subtle Season / Coordinates Meta */}
+        {destination.bestSeason && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: 14,
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.68rem',
+              color: 'rgba(244, 245, 240, 0.82)',
+              letterSpacing: '0.04em',
+            }}
+          >
+            Best: {destination.bestSeason}
           </div>
         )}
+      </Link>
 
-        {/* Rating */}
-        <div style={{ position: 'absolute', bottom: 14, right: 14 }}>
-          <div style={ratingBadgeStyle}>
-            <FaStar size={11} color="#E8B84B" />
+      {/* Card Body */}
+      <div
+        style={{
+          padding: '20px 20px 18px',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+        }}
+      >
+        {/* Eyebrow: Division & Duration */}
+        <div
+          className="d-flex align-items-center justify-content-between mb-1"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.68rem',
+            color: 'var(--text-muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          <span>{destination.division}</span>
+          <span>{destination.duration}</span>
+        </div>
+
+        {/* Title & Rating */}
+        <div className="d-flex align-items-baseline justify-content-between gap-2 mb-2">
+          <Link
+            to={`/destinations/${destination.id}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <h5
+              style={{
+                fontFamily: 'var(--font-heading)',
+                fontSize: '1.12rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em',
+                margin: 0,
+              }}
+            >
+              {destination.name}
+            </h5>
+          </Link>
+          <div
+            className="d-flex align-items-center gap-1 flex-shrink-0"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.78rem',
+              color: 'var(--gold)',
+              fontWeight: 500,
+            }}
+          >
+            <FaStar size={11} />
             <span>{destination.rating}</span>
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div style={{ padding: '18px' }}>
-        <div className="d-flex align-items-start justify-content-between mb-1">
-          <h5 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 0, lineHeight: 1.3 }}>
-            {destination.name}
-          </h5>
-        </div>
-
-        <div className="d-flex align-items-center gap-1 mb-2">
-          <FaMapMarkerAlt size={12} color="var(--accent)" />
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{destination.division}</span>
-        </div>
-
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: '14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        {/* Short Editorial Excerpt */}
+        <p
+          style={{
+            fontSize: '0.86rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.6,
+            marginBottom: 18,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
           {destination.shortDesc}
         </p>
 
-        {/* Duration & Price row */}
-        <div className="d-flex align-items-center justify-content-between mb-14">
-          <div className="d-flex align-items-center gap-1">
-            <FaClock size={12} color="var(--text-muted)" />
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{destination.duration}</span>
-          </div>
+        {/* Bottom Architectural Footer */}
+        <div
+          className="d-flex align-items-center justify-content-between mt-auto pt-3"
+          style={{ borderTop: '1px solid var(--border-color)' }}
+        >
           <div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginRight: 2 }}>from</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.66rem',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                display: 'block',
+              }}
+            >
+              Estimated / Person
+            </span>
             <span className="price-tag">{formatPrice(destination.price)}</span>
           </div>
-        </div>
 
-        {/* Highlights */}
-        <div className="d-flex flex-wrap gap-1 mb-16" style={{ marginTop: '10px', marginBottom: '14px' }}>
-          {destination.highlights.slice(0, 3).map((h, i) => (
-            <span key={i} style={tagStyle}>{h}</span>
-          ))}
+          <Link
+            to={`/destinations/${destination.id}`}
+            className="d-inline-flex align-items-center gap-2"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              textDecoration: 'none',
+              padding: '7px 14px',
+              borderRadius: 'var(--radius-sm)',
+              background: 'rgba(244, 245, 240, 0.05)',
+              border: '1px solid var(--border-color)',
+              transition: 'var(--transition)',
+            }}
+          >
+            Explore <FaArrowRight size={10} color="var(--gold)" />
+          </Link>
         </div>
-
-        {/* CTA */}
-        <Link
-          to={`/destinations/${destination.id}`}
-          style={ctaStyle}
-          className="btn-explore"
-        >
-          Explore Destination →
-        </Link>
       </div>
 
-      <style>{cardHoverCSS}</style>
-    </div>
+      <style>{`
+        .destination-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(212, 175, 106, 0.28) !important;
+          box-shadow: var(--shadow-lg);
+        }
+        .destination-card:hover .card-img {
+          transform: scale(1.05);
+        }
+      `}</style>
+    </article>
   );
 }
-
-const cardStyle = {
-  background: 'var(--card-bg)',
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-lg)',
-  overflow: 'hidden',
-  transition: 'var(--transition)',
-  cursor: 'pointer',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-};
-
-const wishlistBtnStyle = (active) => ({
-  position: 'absolute',
-  top: 14,
-  right: 14,
-  width: 34,
-  height: 34,
-  borderRadius: '50%',
-  border: 'none',
-  background: active ? 'var(--accent)' : 'rgba(13,27,42,0.7)',
-  backdropFilter: 'blur(8px)',
-  color: active ? '#fff' : 'var(--text-secondary)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  transition: 'var(--transition)',
-  zIndex: 2,
-});
-
-const ratingBadgeStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  background: 'rgba(13,27,42,0.75)',
-  backdropFilter: 'blur(8px)',
-  borderRadius: '20px',
-  padding: '4px 10px',
-  fontSize: '0.78rem',
-  fontWeight: 700,
-  color: '#E8B84B',
-};
-
-const tagStyle = {
-  background: 'rgba(0,106,78,0.12)',
-  border: '1px solid rgba(0,106,78,0.2)',
-  color: '#4db88c',
-  padding: '2px 8px',
-  borderRadius: '20px',
-  fontSize: '0.7rem',
-  fontWeight: 500,
-};
-
-const ctaStyle = {
-  display: 'block',
-  width: '100%',
-  textAlign: 'center',
-  padding: '10px',
-  background: 'var(--gradient-primary)',
-  color: '#fff',
-  borderRadius: 'var(--radius-md)',
-  fontWeight: 600,
-  fontSize: '0.88rem',
-  fontFamily: 'var(--font-heading)',
-  transition: 'var(--transition)',
-  border: 'none',
-};
-
-const cardHoverCSS = `
-  .destination-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,106,78,0.15);
-    border-color: rgba(0,106,78,0.3);
-  }
-  .destination-card:hover .card-img {
-    transform: scale(1.06);
-  }
-  .btn-explore:hover {
-    opacity: 0.88;
-    transform: none;
-  }
-`;
 
 export default DestinationCard;

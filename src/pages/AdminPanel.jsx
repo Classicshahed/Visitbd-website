@@ -7,7 +7,7 @@ import {
   FaTimes, FaSave, FaEye, FaSearch, FaSync, FaUserPlus,
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import { fetchDestinations, addDestination, editDestination, deleteDestination, fetchStats, fetchAboutContent, saveAboutContent, fetchContactContent, saveContactContent, fetchHomeImages, saveHomeImages, DEFAULT_ABOUT, DEFAULT_CONTACT, DEFAULT_HOME_IMAGES } from '../services/api';
+import { fetchDestinations, addDestination, editDestination, deleteDestination, fetchStats, fetchAboutContent, saveAboutContent, fetchContactContent, saveContactContent, fetchHomeImages, saveHomeImages, fetchBookings, deleteBooking, fetchContactMessages, updateContactMessageStatus, deleteContactMessage, DEFAULT_ABOUT, DEFAULT_CONTACT, DEFAULT_HOME_IMAGES } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const CATEGORIES = ['Beach','Hill','Forest','Heritage','Lake','Tea Garden','Adventure','Cultural'];
@@ -256,6 +256,8 @@ export default function AdminPanel() {
   const [contactForm, setContactForm] = useState(null);
   const [homeImagesForm, setHomeImagesForm] = useState(null);
   const [pageSaving, setPageSaving]   = useState(false);
+  const [bookingsList, setBookingsList] = useState([]);
+  const [messagesList, setMessagesList] = useState([]);
 
   const showToast = (message, type='success') => setToast({ message, type });
 
@@ -277,6 +279,8 @@ export default function AdminPanel() {
     if (activeTab === 'about' && !aboutForm) fetchAboutContent().then(setAboutForm);
     if (activeTab === 'contact' && !contactForm) fetchContactContent().then(setContactForm);
     if (activeTab === 'images' && !homeImagesForm) fetchHomeImages().then(setHomeImagesForm);
+    if (activeTab === 'bookings') fetchBookings().then(setBookingsList).catch(() => {});
+    if (activeTab === 'inbox') fetchContactMessages().then(setMessagesList).catch(() => {});
   }, [activeTab]);
 
   // ── Handlers ──────────────────────────────────────────────────
@@ -379,12 +383,14 @@ export default function AdminPanel() {
   };
 
   const TABS = [
-    { key:'stats',   icon:'📊', label:'Stats'        },
-    { key:'add',     icon:'➕', label:'Add New'      },
-    { key:'manage',  icon:'📋', label:'Manage All'   },
-    { key:'about',   icon:'📄', label:'About Page'   },
-    { key:'contact', icon:'📞', label:'Contact Page' },
-    { key:'images',  icon:'🖼️', label:'Images'       },
+    { key:'stats',    icon:'📊', label:'Stats'        },
+    { key:'add',      icon:'➕', label:'Add New'      },
+    { key:'manage',   icon:'📋', label:'Manage All'   },
+    { key:'bookings', icon:'📅', label:'Bookings'     },
+    { key:'inbox',    icon:'✉️', label:'Inbox'        },
+    { key:'about',    icon:'📄', label:'About Page'   },
+    { key:'contact',  icon:'📞', label:'Contact Page' },
+    { key:'images',   icon:'🖼️', label:'Images'       },
   ];
 
   const CATEGORY_COLORS = {
@@ -452,12 +458,12 @@ export default function AdminPanel() {
             </div>
             {stats ? (
               <div className="row g-3 mb-5">
-                <div className="col-6 col-md-4"><StatCard emoji="🗺️" label="Total Destinations" value={stats.total} color="var(--primary-light)" sub="Including admin additions"/></div>
+                <div className="col-6 col-md-4"><StatCard emoji="🗺️" label="Total Destinations" value={stats.total} color="var(--primary-light)" sub="Active in SQLite DB"/></div>
                 <div className="col-6 col-md-4"><StatCard emoji="⭐" label="Featured" value={stats.featured} color="var(--gold)" sub="Shown in hero sections"/></div>
                 <div className="col-6 col-md-4"><StatCard emoji="🛡️" label="Admin Added" value={stats.adminAdded} color="#00B4D8" sub="via Admin Panel"/></div>
-                <div className="col-6 col-md-4"><StatCard emoji="✏️" label="Edited" value={stats.edited} color="#9C27B0" sub="Base records modified"/></div>
-                <div className="col-6 col-md-4"><StatCard emoji="🗑️" label="Deleted" value={stats.deleted} color="#F42A41" sub="Removed from listing"/></div>
-                <div className="col-6 col-md-4"><StatCard emoji="🏷️" label="Categories" value={stats.categories} color="#558B2F" sub="Unique types"/></div>
+                <div className="col-6 col-md-4"><StatCard emoji="👥" label="Registered Users" value={stats.usersCount ?? 2} color="#9C27B0" sub="Database accounts"/></div>
+                <div className="col-6 col-md-4"><StatCard emoji="📅" label="Planned Trips" value={stats.bookingsCount ?? 0} color="#558B2F" sub="Traveler bookings"/></div>
+                <div className="col-6 col-md-4"><StatCard emoji="✉️" label="Inbox Messages" value={stats.messagesCount ?? 0} color="#F42A41" sub={`${stats.unreadMessages ?? 0} unread`}/></div>
               </div>
             ) : <LoadingSpinner text="Loading stats..."/>}
 
@@ -820,6 +826,120 @@ export default function AdminPanel() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* BOOKINGS TAB */}
+        {activeTab === 'bookings' && (
+          <div>
+            <div className="d-flex align-items-center justify-content-between mb-4">
+              <h4 style={{ fontFamily:'var(--font-heading)', color:'var(--text-primary)', margin:0 }}>
+                📅 All Traveler Bookings ({bookingsList.length})
+              </h4>
+              <button onClick={() => fetchBookings().then(setBookingsList)} style={cancelBtnSt}>
+                <FaSync size={11}/> Refresh
+              </button>
+            </div>
+            {bookingsList.length === 0 ? (
+              <div style={{ textAlign:'center', padding:'50px 0', color:'var(--text-muted)' }}>
+                No traveler bookings recorded in database yet.
+              </div>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {bookingsList.map(b => (
+                  <div key={b.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, background:'var(--card-bg)', border:'1px solid var(--border-color)', borderRadius:14, padding:'16px 20px', flexWrap:'wrap' }}>
+                    <div>
+                      <div style={{ fontFamily:'var(--font-heading)', fontWeight:700, color:'var(--text-primary)', fontSize:'0.98rem' }}>
+                        {b.destination_name} <span style={{ color:'var(--primary-light)', fontSize:'0.75rem' }}>({b.status})</span>
+                      </div>
+                      <div style={{ color:'var(--text-secondary)', fontSize:'0.82rem', marginTop:4 }}>
+                        👤 <strong>{b.user_name}</strong> ({b.user_email}) · 📅 {b.travel_date} · 👥 {b.travelers} Traveler(s) · 🚌 {b.transport_type}
+                      </div>
+                      {b.notes && <div style={{ color:'var(--text-muted)', fontSize:'0.78rem', marginTop:3 }}>Note: {b.notes}</div>}
+                    </div>
+                    <div className="d-flex align-items-center gap-3">
+                      <span style={{ color:'var(--gold)', fontWeight:800, fontSize:'1.05rem' }}>৳{b.total_cost?.toLocaleString('en-BD')}</span>
+                      <button
+                        onClick={async () => {
+                          await deleteBooking(b.id);
+                          setBookingsList(prev => prev.filter(x => x.id !== b.id));
+                          loadStats();
+                          showToast('Booking deleted');
+                        }}
+                        style={{ background:'rgba(244,42,65,0.1)', border:'1px solid rgba(244,42,65,0.3)', color:'#F42A41', padding:'6px 12px', borderRadius:8, cursor:'pointer', fontSize:'0.75rem', fontWeight:600 }}
+                      >
+                        <FaTrash size={11}/> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* INBOX (CONTACT MESSAGES) TAB */}
+        {activeTab === 'inbox' && (
+          <div>
+            <div className="d-flex align-items-center justify-content-between mb-4">
+              <h4 style={{ fontFamily:'var(--font-heading)', color:'var(--text-primary)', margin:0 }}>
+                ✉️ Contact Messages ({messagesList.length})
+              </h4>
+              <button onClick={() => fetchContactMessages().then(setMessagesList)} style={cancelBtnSt}>
+                <FaSync size={11}/> Refresh
+              </button>
+            </div>
+            {messagesList.length === 0 ? (
+              <div style={{ textAlign:'center', padding:'50px 0', color:'var(--text-muted)' }}>
+                No contact messages in database yet.
+              </div>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {messagesList.map(m => (
+                  <div key={m.id} style={{ background:'var(--card-bg)', border:`1px solid ${m.status === 'unread' ? 'rgba(0,200,150,0.4)' : 'var(--border-color)'}`, borderRadius:14, padding:'18px 22px' }}>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                      <div>
+                        <strong style={{ color:'var(--text-primary)', fontSize:'0.95rem' }}>{m.subject}</strong>
+                        <span style={{ marginLeft:10, background: m.status === 'resolved' ? 'rgba(0,106,78,0.2)' : 'rgba(232,184,75,0.15)', color: m.status === 'resolved' ? 'var(--primary-light)' : 'var(--gold)', padding:'2px 9px', borderRadius:999, fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase' }}>
+                          {m.status}
+                        </span>
+                      </div>
+                      <span style={{ color:'var(--text-muted)', fontSize:'0.75rem' }}>{new Date(m.created_at).toLocaleString()}</span>
+                    </div>
+                    <div style={{ color:'var(--primary-light)', fontSize:'0.8rem', marginBottom:8 }}>
+                      From: <strong>{m.name}</strong> &lt;{m.email}&gt;
+                    </div>
+                    <p style={{ color:'var(--text-secondary)', fontSize:'0.88rem', margin:'0 0 12px', whiteSpace:'pre-line' }}>{m.message}</p>
+                    <div className="d-flex gap-2">
+                      {m.status !== 'resolved' && (
+                        <button
+                          onClick={async () => {
+                            await updateContactMessageStatus(m.id, 'resolved');
+                            setMessagesList(prev => prev.map(x => x.id === m.id ? { ...x, status: 'resolved' } : x));
+                            loadStats();
+                            showToast('Marked as resolved');
+                          }}
+                          style={{ background:'rgba(0,106,78,0.18)', border:'1px solid rgba(0,106,78,0.35)', color:'var(--primary-light)', padding:'5px 12px', borderRadius:8, cursor:'pointer', fontSize:'0.75rem', fontWeight:600 }}
+                        >
+                          ✅ Mark Resolved
+                        </button>
+                      )}
+                      <button
+                        onClick={async () => {
+                          await deleteContactMessage(m.id);
+                          setMessagesList(prev => prev.filter(x => x.id !== m.id));
+                          loadStats();
+                          showToast('Message removed');
+                        }}
+                        style={{ background:'rgba(244,42,65,0.1)', border:'1px solid rgba(244,42,65,0.3)', color:'#F42A41', padding:'5px 12px', borderRadius:8, cursor:'pointer', fontSize:'0.75rem', fontWeight:600 }}
+                      >
+                        <FaTrash size={11}/> Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
